@@ -25,12 +25,13 @@ class TargetAgent:
 
 
 class LearningAgent:
-    def __init__(self):
+    def __init__(self, env_description):
         self.world_model = {
+            "environment_description": env_description,
             "target_agent_goal_belief": "unknown",
             "observation_history": [],
         }
-        print("LearningAgent initialized with an empty world model.")
+        print("LearningAgent initialized and has received the room description.")
 
     def observe(self, observation):
         self.world_model["observation_history"].append(observation)
@@ -48,7 +49,10 @@ class LearningAgent:
             print(f'   - "{obs}"')
 
         print("3. Querying LLM for new inference...")
-        inferred_goal = get_goal_inference(self.world_model["observation_history"])
+        inferred_goal = get_goal_inference(
+            self.world_model["observation_history"],
+            self.world_model["environment_description"],
+        )
 
         # Predictive Coding: The "error" is the difference between prior belief and new inference.
         normalized_inferred = inferred_goal.lower().strip(" '.\"")
