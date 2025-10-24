@@ -1,5 +1,5 @@
 # world_model_poc/agents.py
-from .llm_integration import get_goal_inference
+from .llm_integration import get_goal_inference, get_final_verdict
 
 
 class TargetAgent:
@@ -54,18 +54,17 @@ class LearningAgent:
             self.world_model["environment_description"],
         )
 
-        # Predictive Coding: The "error" is the difference between prior belief and new inference.
-        normalized_inferred = inferred_goal.lower().strip(" '.\"")
-        normalized_prior = prior_belief.lower().strip(" '.\"")
+        # Predictive Coding: Use an LLM to semantically check if the belief has truly changed.
+        beliefs_are_different = not get_final_verdict(inferred_goal, prior_belief)
 
-        if inferred_goal and normalized_inferred != normalized_prior:
-            print(f"4. Prediction Error Detected!")
+        if inferred_goal and beliefs_are_different:
+            print(f"4. Prediction Error Detected! (Belief has semantically changed)")
             print(f"   - Old Belief: '{prior_belief}'")
             print(f"   - New Inference: '{inferred_goal}'")
             print("5. Updating World Model...")
             self.world_model["target_agent_goal_belief"] = inferred_goal
         else:
-            print("4. No significant change in belief. World Model is stable.")
+            print("4. No significant semantic change in belief. World Model is stable.")
 
         print(f"6. Current Belief: '{self.world_model['target_agent_goal_belief']}'")
         print("-----------------------------------")
