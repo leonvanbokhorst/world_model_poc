@@ -2,6 +2,7 @@
 import os
 from litellm import completion
 import sys
+from .config import OLLAMA_MODEL
 
 
 def stream_and_capture(response_generator):
@@ -95,7 +96,7 @@ def get_final_verdict(inferred_goal, actual_goal):
 
     try:
         response = completion(
-            model="ollama/llama3.2",
+            model=f"ollama/{OLLAMA_MODEL}",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
             max_tokens=3,
@@ -105,3 +106,49 @@ def get_final_verdict(inferred_goal, actual_goal):
     except Exception as e:
         print(f"Error getting final verdict: {e}")
         return False
+
+
+def get_next_action_from_llm(goal, environment_description, action_history):
+    history_text = (
+        "\n".join(f"- {act}" for act in action_history)
+        if action_history
+        else "No actions taken yet."
+    )
+
+    # This list could be dynamically generated from the environment in a more advanced version
+    possible_actions = [
+        "inspect table",
+        "pick up key",
+        "pick up book",
+        "unlock box",
+        "sit on chair",
+    ]
+
+    prompt = (
+        f"You are a decisive, goal-oriented AI agent. Your ONLY objective is: '{goal}'.\n"
+        "Every action you take must be a logical step towards this goal. Do not get stuck in loops. If an action does not help, choose a different one.\n\n"
+        f"CURRENT WORLD STATE:\n{environment_description}\n\n"
+        f"ACTIONS TAKEN SO FAR:\n{history_text}\n\n"
+        "Analyze the situation. From the list of possible actions below, what is the single most logical next action to take to achieve your goal?\n\n"
+        f"Possible Actions: {', '.join(possible_actions)}\n\n"
+        "Respond with only the single best action from the list."
+    )
+
+    try:
+        # We give the planning agent a slightly higher temperature to encourage novel actions if stuck
+        response = completion(
+            model=f"ollama/{OLLAMA_MODEL}",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=20,
+        )
+        action = response.choices[0].message.content.strip().lower()
+
+        # Clean up the response to get just the action
+        for valid_action in possible_actions:
+            if valid_action in action:
+                return valid_action
+        return "look around"  # Default if no valid action is found
+    except Exception as e:
+        print(f"Error getting next action: {e}")
+        return "look around"

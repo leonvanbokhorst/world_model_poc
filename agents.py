@@ -1,27 +1,47 @@
 # world_model_poc/agents.py
-from .llm_integration import get_goal_inference, get_final_verdict
+from .llm_integration import (
+    get_goal_inference,
+    get_final_verdict,
+    get_next_action_from_llm,
+)
 
 
 class TargetAgent:
     def __init__(self, goal):
         self.goal = goal
-        self.actions = self._plan_actions()
-        print(f"TargetAgent initialized with a hidden goal.")
+        self.action_history = []
+        print(f"TargetAgent initialized with a dynamic, LLM-driven goal: '{goal}'.")
 
-    def _plan_actions(self):
-        if self.goal == "unlock the box":
-            return ["inspect table", "pick up key", "unlock box"]
-        elif self.goal == "read the book":
-            return ["inspect table", "pick up book", "sit on chair"]
-        elif self.goal == "sit on the chair":
-            return ["sit on chair"]
-        else:
-            return ["look around"]
+    def is_goal_achieved(self, env_objects):
+        """Check if the goal has been met based on the state of the world."""
+        if self.goal == "unlock the box" and env_objects.get("box") == "unlocked":
+            print("  TargetAgent confirms its goal ('unlock the box') is complete.")
+            return True
+        if self.goal == "read the book":
+            # This is a bit trickier, we'll say sitting down with the book achieves it.
+            if (
+                env_objects.get("book") == "in TargetAgent's possession"
+                and "sit on chair" in self.action_history
+            ):
+                print("  TargetAgent confirms its goal ('read the book') is complete.")
+                return True
+        return False
 
-    def get_next_action(self):
-        if self.actions:
-            return self.actions.pop(0)
-        return None
+    def get_next_action(self, environment_description, env_objects):
+        if self.is_goal_achieved(env_objects):
+            return None
+
+        # Limit the history to avoid overly long prompts
+        if len(self.action_history) > 5:
+            print("  TargetAgent has reached its action limit. Ending turn.")
+            return None
+
+        print("  TargetAgent is thinking about its next action...")
+        next_action = get_next_action_from_llm(
+            self.goal, environment_description, self.action_history
+        )
+        self.action_history.append(next_action)
+        return next_action
 
 
 class LearningAgent:

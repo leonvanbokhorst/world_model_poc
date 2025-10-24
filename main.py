@@ -57,14 +57,18 @@ def run_simulation():
             print(f"SIMULATION STEP {step}")
             print("=" * 40)
 
-            # TargetAgent acts
-            print(f"\n> TargetAgent's turn...")
-            action = target_agent.get_next_action()
+            # TargetAgent acts dynamically based on the current world state
+            print(f"\n> TargetAgent's turn (Goal: '{target_agent.goal}')...")
+            current_env_desc = room.get_state_description()
+            action = target_agent.get_next_action(current_env_desc, room.objects)
+
             if action is None:
-                print("  TargetAgent has completed its actions. Simulation ending.")
+                print(
+                    "  TargetAgent has completed its goal or reached its action limit. Simulation ending."
+                )
                 break
 
-            print(f"  TargetAgent performs action: '{action}'")
+            print(f"  TargetAgent dynamically chose action: '{action}'")
 
             # Environment updates and generates an observation
             observation = room.update_state(action)
