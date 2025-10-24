@@ -17,15 +17,18 @@ def run_simulation():
     # 2. Simulation Loop
     step = 1
     while True:
-        print(f"\n--- Step {step} ---")
+        print("\n" + "=" * 40)
+        print(f"SIMULATION STEP {step}")
+        print("=" * 40)
 
         # TargetAgent acts
+        print(f"\n> TargetAgent's turn...")
         action = target_agent.get_next_action()
         if action is None:
-            print("TargetAgent has completed its actions. Simulation ending.")
+            print("  TargetAgent has completed its actions. Simulation ending.")
             break
 
-        print(f"TargetAgent performs action: '{action}'")
+        print(f"  TargetAgent performs action: '{action}'")
 
         # Environment updates and generates an observation
         observation = room.update_state(action)
@@ -33,10 +36,11 @@ def run_simulation():
         # LearningAgent observes and updates its world model
         learning_agent.observe(observation)
 
-        time.sleep(1)  # Pause for readability
+        time.sleep(2)  # Pause for readability
         step += 1
 
-    print("\n--- Simulation Report ---")
+    print("\n" + "=" * 40)
+    print("SIMULATION REPORT")
     final_belief = learning_agent.world_model["target_agent_goal_belief"]
     actual_goal = target_agent.goal
     print(f"Final Inferred Goal: {final_belief}")
@@ -44,12 +48,13 @@ def run_simulation():
     # Strip quotes and periods for a more robust comparison
     if final_belief.lower().strip(" '.\"") == actual_goal:
         print(
-            "Conclusion: The LearningAgent successfully inferred the TargetAgent's goal."
+            "\nConclusion: The LearningAgent successfully inferred the TargetAgent's goal."
         )
     else:
         print(
-            "Conclusion: The LearningAgent did not correctly infer the TargetAgent's goal."
+            "\nConclusion: The LearningAgent did not correctly infer the TargetAgent's goal."
         )
+    print("=" * 40)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 # world_model_poc/agents.py
 from .llm_integration import get_goal_inference
 
+
 class TargetAgent:
     def __init__(self, goal):
         self.goal = goal
@@ -20,26 +21,45 @@ class TargetAgent:
             return self.actions.pop(0)
         return None
 
+
 class LearningAgent:
     def __init__(self):
         self.world_model = {
             "target_agent_goal_belief": "unknown",
-            "observation_history": []
+            "observation_history": [],
         }
         print("LearningAgent initialized with an empty world model.")
 
     def observe(self, observation):
         self.world_model["observation_history"].append(observation)
-        print(f"LearningAgent observes: \"{observation}\"")
+        print(f'> LearningAgent observes: "{observation}"')
         self.update_mental_model()
 
     def update_mental_model(self):
-        print("LearningAgent is updating its mental model...")
+        print("\n--- LearningAgent Reasoning Cycle ---")
+        prior_belief = self.world_model["target_agent_goal_belief"]
+
+        print(f"1. Prior Belief: '{prior_belief}'")
+
+        print("2. Reviewing Observation History:")
+        for obs in self.world_model["observation_history"]:
+            print(f'   - "{obs}"')
+
+        print("3. Querying LLM for new inference...")
         inferred_goal = get_goal_inference(self.world_model["observation_history"])
-        
-        # Predictive Coding: The "error" is the change in belief.
-        if inferred_goal and inferred_goal != self.world_model["target_agent_goal_belief"]:
-            print(f"Prediction error detected! Belief updated.")
+
+        # Predictive Coding: The "error" is the difference between prior belief and new inference.
+        normalized_inferred = inferred_goal.lower().strip(" '.\"")
+        normalized_prior = prior_belief.lower().strip(" '.\"")
+
+        if inferred_goal and normalized_inferred != normalized_prior:
+            print(f"4. Prediction Error Detected!")
+            print(f"   - Old Belief: '{prior_belief}'")
+            print(f"   - New Inference: '{inferred_goal}'")
+            print("5. Updating World Model...")
             self.world_model["target_agent_goal_belief"] = inferred_goal
-        
-        print(f"LearningAgent's current belief about TargetAgent's goal: {self.world_model['target_agent_goal_belief']}")
+        else:
+            print("4. No significant change in belief. World Model is stable.")
+
+        print(f"6. Current Belief: '{self.world_model['target_agent_goal_belief']}'")
+        print("-----------------------------------")

@@ -14,6 +14,8 @@ def get_goal_inference(observations):
         "Most likely goal:"
     )
 
+    print(f"   - Sending Prompt to LLM:\n---\n{prompt}\n---")
+
     try:
         response = completion(
             model="ollama/llama3.2",
@@ -27,8 +29,10 @@ def get_goal_inference(observations):
             temperature=0.2,
             max_tokens=20,
         )
+        raw_response = response.choices[0].message.content
+        print(f"   - Received Raw Response from LLM: '{raw_response}'")
         # The response object structure from litellm is the same as OpenAI's
-        return response.choices[0].message.content.strip()
+        return raw_response.strip()
     except Exception as e:
         # It's helpful to print the error to see what's going on with the local model
         print(f"Error calling local LLM: {e}")
