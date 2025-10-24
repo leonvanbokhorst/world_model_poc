@@ -10,9 +10,11 @@ class TargetAgent:
 
     def _plan_actions(self):
         if self.goal == "unlock the box":
-            return ["pick up key", "unlock box"]
+            return ["inspect table", "pick up key", "unlock box"]
+        elif self.goal == "read the book":
+            return ["inspect table", "pick up book", "sit on chair"]
         elif self.goal == "sit on the chair":
-            return ["move to chair", "sit down"]
+            return ["sit on chair"]
         else:
             return ["look around"]
 

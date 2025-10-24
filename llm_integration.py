@@ -8,7 +8,7 @@ def get_goal_inference(observations):
 
     prompt = (
         "Based on the following sequence of actions, what is the most likely goal of the agent? "
-        "The possible goals are: 'unlock the box', 'sit on the chair', or 'inspect the table'. "
+        "The possible goals are: 'unlock the box', 'sit on the chair', or 'read the book'. "
         "Please state only the most likely goal, without any extra explanation.\n\n"
         f"Actions:\n{observation_text}\n\n"
         "Most likely goal:"

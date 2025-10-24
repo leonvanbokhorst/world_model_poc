@@ -6,11 +6,12 @@ class Room:
         self.objects = {
             "key": "on the table",
             "box": "locked",
+            "book": "on the table",
             "chair": "near the table",
             "table": "in the center of the room",
         }
         print(
-            "Environment: A room with a table, a chair, a key on the table, and a locked box."
+            "Environment: A room with a table, a chair, a key, a book, and a locked box."
         )
 
     def get_state_description(self):
@@ -25,12 +26,20 @@ class Room:
         return " ".join(descriptions)
 
     def update_state(self, action):
-        if action == "pick up key":
+        if action == "inspect table":
+            return "TargetAgent is inspecting the table where the key and book are."
+        elif action == "pick up key":
             if self.objects["key"] == "on the table":
                 self.objects["key"] = "in TargetAgent's possession"
                 return "TargetAgent picked up the key from the table."
             else:
                 return "The key is not on the table."
+        elif action == "pick up book":
+            if self.objects["book"] == "on the table":
+                self.objects["book"] = "in TargetAgent's possession"
+                return "TargetAgent picked up the book from the table."
+            else:
+                return "The book is not on the table."
         elif action == "unlock box":
             if self.objects["key"] == "in TargetAgent's possession":
                 if self.objects["box"] == "locked":
@@ -40,4 +49,9 @@ class Room:
                     return "The box is already unlocked."
             else:
                 return "TargetAgent does not have the key."
+        elif action == "sit on chair":
+            if self.objects["book"] == "in TargetAgent's possession":
+                return "TargetAgent sat on the chair to read the book."
+            else:
+                return "TargetAgent sat on the chair."
         return f"TargetAgent performs an unknown action: {action}"

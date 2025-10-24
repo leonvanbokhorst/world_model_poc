@@ -1,5 +1,6 @@
 # world_model_poc/main.py
 import time
+import random
 from .environment import Room
 from .agents import TargetAgent, LearningAgent
 
@@ -9,8 +10,15 @@ def run_simulation():
 
     # 1. Initialize Environment and Agents
     room = Room()
-    target_agent = TargetAgent(goal="unlock the box")
+
+    # Add a new challenge: The target goal is now randomized
+    possible_goals = ["unlock the box", "read the book"]
+    chosen_goal = random.choice(possible_goals)
+
+    target_agent = TargetAgent(goal=chosen_goal)
     learning_agent = LearningAgent()
+
+    print(f"\nTargetAgent has been assigned a random, hidden goal.")
 
     print("\n--- Simulation Begins ---")
 
